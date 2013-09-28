@@ -38,25 +38,12 @@ Ext.define('CustomApp', {
                 },
                 listeners:{
    			ready: function(combobox){
-   				var typeDefRef = combobox.getRecord().get('_ref');
-                                console.log('ready', typeDefRef);
-                                var attributesRef = combobox.getRecord().get('Attributes')._ref;
-                                var attributes = combobox.getRecord().getCollection('Attributes');
-                                console.log('attributesRef', attributesRef);
-                                console.log('attributes', attributes);
-   				this._loadCustomFields(attributes);
-   				//console.log('what is this', this);
+   				this._loadCustomFields(combobox.getRecord().getCollection('Attributes'));
    			},
    			select: function(combobox){
-   				var typeDefRef = combobox.getRecord().get('_ref');
-                                console.log('ready', typeDefRef);
-                                var attributesRef = combobox.getRecord().get('Attributes')._ref;
-                                var attributes = combobox.getRecord().getCollection('Attributes');
-                                console.log('attributesRef', attributesRef);
-                                console.log('attributes', attributes);
-   				this._loadCustomFields(attributes);
+   				this._loadCustomFields(combobox.getRecord().getCollection('Attributes'));
    			},
-   			scope: this  //IMPORTANT
+   			scope: this
    		}
             });
             this._comboBoxContainer.add(typeDefCombobox);
@@ -69,21 +56,14 @@ Ext.define('CustomApp', {
         attributes.load({
                                 fetch: ['ElementName'],
                                 callback: function(records, operation, success){
-                                    //var fields = [];//this works
                                     Ext.Array.each(records, function(field){
                                         console.log('field',field);
                                         fields.push(field.get('ElementName'));
-                                  // }, this);
                                     });
                                    console.log('fields',fields);
                                    that._buildCustomFieldsCombobox(fields);
-                                }//,
-                                //scope: this
+                                }
                             });
-                            
-        
-        
-      // console.log('fields outside of callback',fields); //empty array 
     },
     
     _buildCustomFieldsCombobox: function(fields){
