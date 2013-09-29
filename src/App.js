@@ -7,8 +7,7 @@ Ext.define('CustomApp', {
                 items:[
                     {
                         xtype: 'text',
-                        id: 't',
-                        //text: 'Some text'
+                        id: 't'
                         }
                 ]
              
@@ -68,7 +67,6 @@ Ext.define('CustomApp', {
                                         if (field.get('Custom')===true) {
                                             fields.push({'name':field.get('ElementName')}); 
                                         }
-                                        //fields.push({'name':field.get('ElementName'),'custom':field.get('Custom')}); //
                                     });
                                     if (!that.down('#cb2')) {
                                         that._buildCustomFieldsCombobox(fields);
@@ -90,13 +88,6 @@ Ext.define('CustomApp', {
         if (fields.length>0) {
              var customFieldsStore = Ext.create('Ext.data.Store', {
             autoLoad: true,
-            //fields: ['name','custom'],
-            /*filters:[
-                {
-                    property: 'custom',
-                    value: true
-                }
-            ],*/
             fields: ['name'],
             data: fields
         });
@@ -109,20 +100,20 @@ Ext.define('CustomApp', {
                 value: fields[0].name,
                 listeners:{
    			ready: function(combobox){
-   				that._showCustomFields();
+   				that._loadData(combobox.getRecord().get('name'));
    			},
    			select: function(combobox){
-   				that._showCustomFields();
+   				that._loadData(combobox.getRecord().get('name'));
    			},
    			scope: this
    		}
             });
-            this._comboBoxContainer.add(customFieldsCombobox);
-        }
-       
+         this._comboBoxContainer.add(customFieldsCombobox);
+        }   
     },
     
-    _showCustomFields:function(){
-        console.log('_showCustomFields');
+    _loadData:function(customField){
+        console.log('work item:',Ext.getCmp('cb1').getRawValue());
+        console.log('custom field:',customField);
     }
 });
