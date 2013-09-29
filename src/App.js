@@ -4,7 +4,13 @@ Ext.define('CustomApp', {
 
     launch: function() {
             this._comboBoxContainer = Ext.create('Ext.Container', {
-            
+                items:[
+                    {
+                        xtype: 'text',
+                        id: 't',
+                        //text: 'Some text'
+                        }
+                ]
              
             });
             this.add(this._comboBoxContainer);
@@ -59,7 +65,10 @@ Ext.define('CustomApp', {
                                 callback: function(records, operation, success){
                                     Ext.Array.each(records, function(field){
                                         console.log('field',field);
-                                        fields.push({'name':field.get('ElementName')}); //
+                                        if (field.get('Custom')===true) {
+                                            fields.push({'name':field.get('ElementName')}); 
+                                        }
+                                        //fields.push({'name':field.get('ElementName'),'custom':field.get('Custom')}); //
                                     });
                                     if (!that.down('#cb2')) {
                                         that._buildCustomFieldsCombobox(fields);
@@ -77,8 +86,17 @@ Ext.define('CustomApp', {
         
         var that = this;
         console.log('fields',fields);
-        var customFieldsStore = Ext.create('Ext.data.Store', {
+        that.down('#t').setText('Number of custom fields: ' + fields.length );
+        if (fields.length>0) {
+             var customFieldsStore = Ext.create('Ext.data.Store', {
             autoLoad: true,
+            //fields: ['name','custom'],
+            /*filters:[
+                {
+                    property: 'custom',
+                    value: true
+                }
+            ],*/
             fields: ['name'],
             data: fields
         });
@@ -100,6 +118,8 @@ Ext.define('CustomApp', {
    		}
             });
             this._comboBoxContainer.add(customFieldsCombobox);
+        }
+       
     },
     
     _showCustomFields:function(){
