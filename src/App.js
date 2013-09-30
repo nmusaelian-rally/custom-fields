@@ -34,17 +34,6 @@ Ext.define('CustomApp', {
                                 value: 'Task'  
                             });
                             filter.toString();
-            /*                
-            var typeDefStore = Ext.create('Rally.data.WsapiDataStore', {
-                autoLoad: true,
-                model: 'TypeDefinition',
-                fetch: ['Attributes','ElementName','TypePath'],
-                valueField: 'ElementName',  
-                filters:[filter]
-            });*/
-            
-            /*valueField - according to doc Defaults to: '_ref', maybe it means '_refObjectName',
-            which is "Hierarchical Requirement" or "Test Case" when there is space in the name*/
             
             
             var typeDefCombobox = Ext.widget('rallycombobox', {
@@ -59,41 +48,17 @@ Ext.define('CustomApp', {
                 listeners:{
    			ready: function(combobox){
                                 console.log('typeDefCobobox listener: ready');
-   				//this._loadCustomFields(combobox.getRecord().getCollection('Attributes'));
                                 this._loadCustomFields(combobox.getRecord());
    			},
    			select: function(combobox){
                                 console.log('typeDefCobobox listener: select');
-   				//this._loadCustomFields(combobox.getRecord().getCollection('Attributes'));
                                 this._loadCustomFields(combobox.getRecord());
    			},
    			scope: this
    		}
             });
-            /*
-             var typeDefCombobox = Ext.widget('rallycombobox', {
-                id: 'cb1',
-                store: typeDefStore,
-                listeners:{
-                        
-   			ready: function(combobox){
-                                //console.log('STORE', typeDefCombobox.store.valueField);
-                                console.log('typeDefCobobox listener: ready');
-   				//this._loadCustomFields(combobox.getRecord().getCollection('Attributes'));
-                                this._loadCustomFields(combobox.getRecord());
-                                
-   			},
-   			select: function(combobox){
-                                console.log('typeDefCobobox listener: select');
-   				//this._loadCustomFields(combobox.getRecord().getCollection('Attributes'));
-                                this._loadCustomFields(combobox.getRecord());
-   			},
-   			scope: this
-   		}
-            });*/
             this._comboBoxContainer.add(typeDefCombobox);
     },
-   // _loadCustomFields: function(attributes){
     _loadCustomFields: function(record){
         console.log('_loadCustomFields');
         var that = this;
@@ -107,8 +72,7 @@ Ext.define('CustomApp', {
                                 fetch: ['ElementName'],
                                 callback: function(records, operation, success){
                                     Ext.Array.each(records, function(field){
-                                        //console.log('field.ElementName',field.get('ElementName')); //names of fields of type, e.g. ObjectID
-                                        if (field.get('Custom')===true) {
+                                        if (field.get('Custom')===true && field.get('AttributeType') != "TEXT" && field.get('AttributeType') != "BOOLEAN") {
                                             fields.push({'name':field.get('ElementName')}); 
                                         }
                                     });
@@ -125,17 +89,14 @@ Ext.define('CustomApp', {
     },
     
     _buildCustomFieldsCombobox: function(fields){
-        console.log('_buildCustomFieldsCombobox.... _type', this._type);
-        var that = this;
-        //console.log('fields',fields);
-        that.down('#t').setText('Number of custom fields: ' + fields.length );
+        this.down('#t').setText('Number of custom fields: ' + fields.length + ' (text and boolean fields are excluded)' );
         if (fields.length>0) {
-             var customFieldsStore = Ext.create('Ext.data.Store', {
+             var customFieldsStore = Ext.create('Ext.data.Store', {      //create a store of custom fields
             autoLoad: true,
             fields: ['name'],
             data: fields
         });
-         var customFieldsCombobox = Ext.widget('rallycombobox', {
+         var customFieldsCombobox = Ext.widget('rallycombobox', {        //create a combobox populated by custom fields
                 id: 'cb2',
                 store: customFieldsStore,
                 queryMode: 'local',
@@ -144,12 +105,14 @@ Ext.define('CustomApp', {
                 value: fields[0].name,
                 listeners:{
    			ready: function(combobox){
-                                console.log('customFieldsCobobox listener: ready');
-   				that._loadData(combobox.getRecord().get('name'));
+                                this._customField = combobox.getRecord().get('name');
+                                console.log('this._customField in ready',this._customField);
+   				this._loadData();
    			},
    			select: function(combobox){
-                                console.log('customFieldsCobobox listener: ready');
-   				that._loadData(combobox.getRecord().get('name'));
+                                this._customField = combobox.getRecord().get('name');
+                                console.log('this._customField in select',this._customField);
+   				this._loadData();
    			},
    			scope: this
    		}
@@ -158,40 +121,21 @@ Ext.define('CustomApp', {
         }   
     },
     
-    _loadData:function(customField){
-        console.log('_loadData..._type', this._type);
-        console.log('work item:',Ext.getCmp('cb1').getRawValue());  //the raw value has space in "Hierarchical Requirement" or "Test Case", which does not work when used in '_type' variable
-        console.log('custom field:',customField);
-        //var _type = Ext.getCmp('cb1').getRawValue();
+    _loadData:function(){
+        //console.log('_loadData..._type', this._type);
+        //console.log('work item:',Ext.getCmp('cb1').getRawValue());  //the raw value has space in "Hierarchical Requirement" or "Test Case", which does not work when used in '_type' variable
+        //console.log('custom field:',customField);
         
-        /*
-        var myStore = Ext.create('Rally.data.WsapiDataStore',{
-   		model: type,
-   		autoLoad:true,
-   		//fetch: true,  //this is by default, bue we can be explicit
-   		fetch: [customField, 'Name', 'FormattedID'],
-   		filters:[
-   			{
-   				customField: {$exists: true}
-   			}
-   		],
-   		listeners: {
-   			load: function(store,records,success){
-   				console.log("loaded %i records", records.length);
-   				this._updateGrid(myStore);
-   			},
-   			scope:this
-   		}
-   	});*/
         
         var snapshotStore = Ext.create('Rally.data.lookback.SnapshotStore', {
                     context: {
                         workspace: '/workspace/12352608129'
                     },
                     autoLoad : true,
+
                     filters  : [
                             {
-                                  property : customField,
+                                  property : this._customField,
                                   operator : 'exists',
                                   value : true
                        
@@ -202,21 +146,41 @@ Ext.define('CustomApp', {
                                   property : '_TypeHierarchy',
                                   value    : this._type
                              }],
-                    fetch: ['Name','_UnformattedID',customField], 
+                    fetch: ['Name','_UnformattedID',this._customField], 
                     order: 'OpenedDate DESC',
-                    //hydrate: ['Blocked','ScheduleState'],
-                    //compress: true,
                     listeners: {
                         load: function (snapshotStore, data, success) {
                             console.log(snapshotStore.getCount());
-   			    this._updateGrid(snapshotStore, data, success);
+   			    //this._updateGrid(snapshotStore, data, success);
+                            this._updateGrid(snapshotStore);
                         },
                         scope:this
                     }
                 });
     },
-    _updateGrid: function(snapshotStore, data){
-        console.log('_updateGrid');
-        console.log('data', data);
-    }
+    _updateGrid: function(snapshotStore){
+        if(this._myGrid === undefined){
+   		this._createGrid(snapshotStore);
+   	}
+   	else{
+                console.log('_updateGrid, else, snapshotStore', snapshotStore);
+                console.log('this._customField in else of _updateGrid()',this._customField);
+   		this._myGrid.reconfigure(snapshotStore);
+   	}
+    },
+    _createGrid: function(snapshotStore){
+        console.log('this._customField in _createGrid()',this._customField);
+   	console.log("load grid...", snapshotStore);
+   	this._myGrid = Ext.create('Ext.grid.Panel', {
+   		title: 'work items with custom field',
+   		store: snapshotStore,
+   		columns: [
+   		        {text: 'ID', dataIndex: '_UnformattedID'},
+   			{text: 'Name', dataIndex: 'Name'},
+   			{text: this._customField, dataIndex: this._customField}
+   		],
+   		height: 400
+   	});
+   	this.add(this._myGrid);
+   }
 });
