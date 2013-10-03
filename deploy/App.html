@@ -72,13 +72,10 @@ Ext.define('CustomApp', {
     },
 
     _loadCustomFields: function(record){
-        console.log('_loadCustomFields');
         var that = this;
         var attributes = record.getCollection('Attributes');
         console.log('attributes', record.getCollection('Attributes'));
         this._type = record.get('ElementName');
-        console.log('ElementName', this._type);
-        
         var fieldsArray = [];
         attributes.load({
                                 fetch: ['ElementName'],
@@ -101,17 +98,12 @@ Ext.define('CustomApp', {
     },
     
     _buildCustomFieldsCombobox: function(fields){
-        //console.log('_buildCustomFieldsCombobox.... _type', this._type);
-        var that = this;
-        //console.log('fields',fields);
-        that.down('#t').setText('Number of custom fields: ' + fields.length );
-        if (fields.length>0) {
-            
+        this.down('#t').setText('Number of custom fields: ' + fields.length );
+        if (fields.length>0) { 
             var customFieldsStore = Ext.create('Rally.data.custom.Store', {
             autoLoad: true,
             fields: ['name'],
-            data: fields,
-            valueField: 'name',
+            data: fields
         });
          var customFieldsCombobox = Ext.widget('rallycombobox', {
                 id: 'cb2',
@@ -121,14 +113,12 @@ Ext.define('CustomApp', {
                 value: fields[0].name,
                 listeners:{
    			ready: function(combobox){
-                                that._customField = combobox.getRecord().get('name');
-                                console.log('customFieldsCobobox listener: ready');
-                                that._loadData();
+                                this._customField = combobox.getRecord().get('name');
+                                this._loadData();
    			},
    			select: function(combobox){
-                                that._customField = combobox.getRecord().get('name');
-                                console.log('customFieldsCobobox listener: ready');
-                                that._loadData();
+                                this._customField = combobox.getRecord().get('name');
+                                this._loadData();
    			},
    			scope: this
    		}
@@ -138,12 +128,6 @@ Ext.define('CustomApp', {
     },
     
     _loadData:function(){
-        var that = this;
-        console.log('_loadData..._type', this._type);
-       // console.log('work item:',Ext.getCmp('cb1').getRawValue());  //the raw value has space in "Hierarchical Requirement" or "Test Case", which does not work when used in '_type' variable
-        console.log('custom field:',this._customField);
-        
-        
         var snapshotStore = Ext.create('Rally.data.lookback.SnapshotStore', {
                     context: {
                         workspace: '/workspace/12352608129'
@@ -162,40 +146,35 @@ Ext.define('CustomApp', {
                                   property : '_TypeHierarchy',
                                   value    : this._type
                              }],
-                    fetch: ['Name','_UnformattedID',that._customField], 
+                    fetch: ['Name','_UnformattedID',this._customField], 
                     order: 'OpenedDate DESC',
                     listeners: {
-                        load: function (snapshotStore, data, success) {
+                        load: function (snapshotStore) {
                             console.log(snapshotStore.getCount());
-   			    this._updateGrid(snapshotStore, data, success);
+   			    this._updateGrid(snapshotStore);
                         },
                         scope:this
                     }
                 });
     },
-     _updateGrid: function(snapshotStore, data){
+     _updateGrid: function(snapshotStore){
         if(this._myGrid === undefined){
    		this._createGrid(snapshotStore);
    	}
    	else{
-                console.log('_updateGrid, else, snapshotStore', snapshotStore);
-                console.log('this._customField in else of _updateGrid()',this._customField);
-                console.log('this._customField', this._customField);
-   		this._myGrid.reconfigure(snapshotStore);
+                Ext.getCmp('g').destroy();
+                this._createGrid(snapshotStore);
    	}
     },
-    _createGrid: function(snapshotStore, data){
-        var that = this;
-        console.log('this._customField in _createGrid()',this._customField);
-   	console.log("load grid...", snapshotStore);
+    _createGrid: function(snapshotStore){
    	this._myGrid = Ext.create('Ext.grid.Panel', {
    		title: 'work items with custom field',
    		store: snapshotStore,
+                id:'g',
    		columns: [
    		        {text: 'ID', dataIndex: '_UnformattedID'},
    			{text: 'Name', dataIndex: 'Name'},
-                        {text: that._customField, dataIndex: that._customField} //empty column when selection in the second combobox changes and grid reconfigures
-   			//{text: that._customField, dataIndex: that._foo}  //{text: that._customField, dataIndex: that._foo} no error but column in empty
+                        {text: this._customField, dataIndex: this._customField}
    		],
    		height: 400
    	});
