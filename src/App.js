@@ -121,35 +121,6 @@ Ext.define('CustomApp', {
     },
     
     _loadData:function(){
-        /*
-        var aStore = Ext.create('Rally.data.lookback.SnapshotStore', {
-                    context: {
-                        workspace: '/workspace/12352608129'
-                    },
-                    autoLoad : true,
-                    filters  : [
-                            {
-                                  property : this._customField,
-                                  operator : 'exists',
-                                  value : true
-                       
-                           },{
-                                  property : '__At',
-                                  value    : 'current'
-                            },{
-                                  property : '_TypeHierarchy',
-                                  value    : this._type
-                             }],
-                    fetch: ['Name','_UnformattedID',this._customField], 
-                    order: 'OpenedDate DESC',
-                    listeners: {
-                        load: function (aStore) {
-                            console.log(aStore.getCount());
-   			    this._updateGrid(aStore);
-                        },
-                        scope:this
-                    }
-                }); */
         var aStore = Ext.create('Rally.data.WsapiDataStore', {
                     context: {
                         workspace: '/workspace/12352608129'
@@ -160,7 +131,7 @@ Ext.define('CustomApp', {
                            {
                                   property : this._customField,
                                   operator : '!=',
-                                  value : ""
+                                  value : ''
                            }
                     ],
                     fetch: ['Name','FormattedID',this._customField], 
@@ -189,11 +160,10 @@ Ext.define('CustomApp', {
    		store: aStore,
                 id:'g',
    		columns: [
-   		        //{text: 'ID', dataIndex: '_UnformattedID'},
-                        {text: 'Formatted ID', dataIndex: 'FormattedID', xtype: 'templatecolumn',flex:1,
+                        {text: 'Formatted ID', dataIndex: 'FormattedID', xtype: 'templatecolumn',
                             tpl: Ext.create('Rally.ui.renderer.template.FormattedIDTemplate')},
-   			{text: 'Name', dataIndex: 'Name', flex:2},
-                        {text: this._customField, dataIndex: this._customField,flex:1}
+   			{text: 'Name', dataIndex: 'Name'},
+                        {text: this._customField, dataIndex: this._customField}
    		],
    		height: 400
    	});
