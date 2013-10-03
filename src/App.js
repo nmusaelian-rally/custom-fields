@@ -10,7 +10,6 @@ Ext.define('CustomApp', {
                         id: 't'
                         }
                 ]
-             
             });
             this.add(this._comboBoxContainer);
              var filter = Ext.create('Rally.data.QueryFilter', {
@@ -81,20 +80,19 @@ Ext.define('CustomApp', {
                                         Ext.getCmp('cb2').destroy();
                                         that._buildCustomFieldsCombobox(fieldsArray);
                                     }
-                                   
                                 }
                             });
     },
     
     _buildCustomFieldsCombobox: function(fields){
         this.down('#t').setText('Number of custom fields: ' + fields.length );
-        if (fields.length>0) { 
+        if (fields.length>0) { //build a combobox of custom fields only if they exist
             var customFieldsStore = Ext.create('Rally.data.custom.Store', {
             autoLoad: true,
             fields: ['name'],
             data: fields
         });
-         var customFieldsCombobox = Ext.widget('rallycombobox', {
+         this._customFieldsCombobox = Ext.widget('rallycombobox', {
                 id: 'cb2',
                 store: customFieldsStore,
                 valueField: 'name',
@@ -112,8 +110,14 @@ Ext.define('CustomApp', {
    			scope: this
    		}
             });
-         this._comboBoxContainer.add(customFieldsCombobox);
-        }   
+         this._comboBoxContainer.add(this._customFieldsCombobox);
+        }
+        else{ //if there are no custom fields
+            //if (this._myGrid !== undefined) {
+                this._customField  = '';
+                this._updateGrid();
+            //}
+        }
     },
     
     _loadData:function(){
@@ -147,7 +151,7 @@ Ext.define('CustomApp', {
                 });
     },
      _updateGrid: function(snapshotStore){
-        if(this._myGrid === undefined){
+        if (this._myGrid === undefined){
    		this._createGrid(snapshotStore);
    	}
    	else{
@@ -156,7 +160,7 @@ Ext.define('CustomApp', {
    	}
     },
     _createGrid: function(snapshotStore){
-   	this._myGrid = Ext.create('Ext.grid.Panel', {
+            this._myGrid = Ext.create('Ext.grid.Panel', {
    		title: 'work items with custom field',
    		store: snapshotStore,
                 id:'g',
