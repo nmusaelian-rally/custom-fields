@@ -132,7 +132,8 @@ Ext.define('CustomApp', {
     },
     
     _loadData:function(){
-        var snapshotStore = Ext.create('Rally.data.lookback.SnapshotStore', {
+        /*
+        var aStore = Ext.create('Rally.data.lookback.SnapshotStore', {
                     context: {
                         workspace: '/workspace/12352608129'
                     },
@@ -153,32 +154,57 @@ Ext.define('CustomApp', {
                     fetch: ['Name','_UnformattedID',this._customField], 
                     order: 'OpenedDate DESC',
                     listeners: {
-                        load: function (snapshotStore) {
-                            console.log(snapshotStore.getCount());
-   			    this._updateGrid(snapshotStore);
+                        load: function (aStore) {
+                            console.log(aStore.getCount());
+   			    this._updateGrid(aStore);
                         },
                         scope:this
                     }
-                });
+                }); */
+        var aStore = Ext.create('Rally.data.WsapiDataStore', {
+                    context: {
+                        workspace: '/workspace/12352608129'
+                    },
+                    model: this._type,
+                    autoLoad : true,
+                    filters  : [
+                           {
+                                  property : this._customField,
+                                  operator : '!=',
+                                  value : ""
+                           }
+                    ],
+                    fetch: ['Name','FormattedID',this._customField], 
+                    order: 'OpenedDate DESC',
+                    listeners: {
+                        load: function (aStore) {
+                            console.log(aStore.getCount());
+   			    this._updateGrid(aStore);
+                        },
+                        scope:this
+                    }
+                }); 
     },
-     _updateGrid: function(snapshotStore){
+     _updateGrid: function(aStore){
         if (this._myGrid === undefined){
-   		this._createGrid(snapshotStore);
+   		this._createGrid(aStore);
    	}
    	else{
                 Ext.getCmp('g').destroy();
-                this._createGrid(snapshotStore);
+                this._createGrid(aStore);
    	}
     },
-    _createGrid: function(snapshotStore){
+    _createGrid: function(aStore){
             this._myGrid = Ext.create('Ext.grid.Panel', {
    		title: 'work items with custom field',
-   		store: snapshotStore,
+   		store: aStore,
                 id:'g',
    		columns: [
-   		        {text: 'ID', dataIndex: '_UnformattedID'},
-   			{text: 'Name', dataIndex: 'Name'},
-                        {text: this._customField, dataIndex: this._customField}
+   		        //{text: 'ID', dataIndex: '_UnformattedID'},
+                        {text: 'Formatted ID', dataIndex: 'FormattedID', xtype: 'templatecolumn',flex:1,
+                            tpl: Ext.create('Rally.ui.renderer.template.FormattedIDTemplate')},
+   			{text: 'Name', dataIndex: 'Name', flex:2},
+                        {text: this._customField, dataIndex: this._customField,flex:1}
    		],
    		height: 400
    	});
