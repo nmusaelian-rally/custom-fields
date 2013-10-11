@@ -40,7 +40,7 @@ Ext.define('CustomApp', {
                 storeConfig: {
                     autoLoad: true,
                     model: 'TypeDefinition',
-                    fetch: ['Attributes','ElementName', 'TypePath'],
+                    fetch: ['Attributes','ElementName'],
                     valueField: 'ElementName',  
                     filters:[filter]
                 },
@@ -113,10 +113,8 @@ Ext.define('CustomApp', {
          this._comboBoxContainer.add(this._customFieldsCombobox);
         }
         else{ //if there are no custom fields
-            //if (this._myGrid !== undefined) {
                 this._customField  = '';
                 this._updateGrid();
-            //}
         }
     },
     
